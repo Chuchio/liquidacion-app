@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Liquidación">
+<title>Liquidación</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c10;
+    --surface: #16161e;
+    --surface2: #1e1e2a;
+    --accent: #00e5a0;
+    --accent2: #00b8ff;
+    --text: #f0f0f5;
+    --muted: #6b6b80;
+    --danger: #ff4466;
+    --border: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* Header */
+  .header {
+    padding: 54px 24px 20px;
+    background: linear-gradient(180deg, rgba(0,229,160,0.08) 0%, transparent 100%);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-label {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  .header h1 span {
+    color: var(--accent);
+  }
+
+  /* Steps indicator */
+  .steps {
+    display: flex;
+    gap: 6px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step-dot {
+    height: 3px;
+    flex: 1;
+    border-radius: 2px;
+    background: var(--surface2);
+    transition: background 0.4s ease;
+  }
+
+  .step-dot.active { background: var(--accent); }
+  .step-dot.done { background: rgba(0,229,160,0.4); }
+
+  /* Main content */
+  .content {
+    flex: 1;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Screens */
+  .screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    animation: fadeUp 0.35s ease;
+  }
+
+  .screen.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .screen-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .screen-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  /* Selector grid */
+  .selector-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .selector-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+
+  .option-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .option-btn span { position: relative; z-index: 1; }
+
+  .option-btn.selected {
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  .option-btn.selected::before { opacity: 1; }
+
+  .option-btn:active { transform: scale(0.96); }
+
+  /* Dollar input */
+  .dollar-input-wrap {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 20px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+
+  .dollar-input-wrap:focus-within {
+    border-color: var(--accent);
+  }
+
+  .dollar-sign {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .dollar-input {
+    background: none;
+    border: none;
+    outline: none;
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    width: 100%;
+    letter-spacing: -1px;
+  }
+
+  .dollar-input::placeholder { color: var(--muted); }
+
+  /* Summary card */
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+
+  .summary-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .summary-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* CTA Button */
+  .cta-btn {
+    margin-top: auto;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    border-radius: 16px;
+    padding: 18px;
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--bg);
+    cursor: pointer;
+    width: 100%;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-btn:active { transform: scale(0.97); }
+
+  .cta-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .back-btn {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+    transition: all 0.2s;
+  }
+
+  .back-btn:active { opacity: 0.6; }
+
+  /* Loading */
+  .loading-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 20px;
+    animation: fadeUp 0.35s ease;
+  }
+
+  .loading-screen.active { display: flex; }
+
+  .spinner {
+    width: 56px;
+    height: 56px;
+    border: 3px solid var(--surface2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .loading-sub {
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* Success */
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  /* Error */
+  .error-badge {
+    background: rgba(255,68,102,0.1);
+    border: 1px solid rgba(255,68,102,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--danger);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  /* Bottom safe area */
+  .safe-bottom { height: env(safe-area-inset-bottom, 16px); }
+
+  /* Quincena badge */
+  .quincena-option {
+    padding: 20px 12px;
+  }
+
+  .quincena-option .q-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .quincena-option .q-label {
+    font-size: 10px;
+    color: var(--muted);
+    display: block;
+  }
+
+  .option-btn.selected .q-label { color: var(--bg); opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">Pirca Construcciones</div>
+  <h1>Liquidación<br><span>de Sueldos</span></h1>
+</div>
+
+<div class="steps" id="stepsBar">
+  <div class="step-dot active" id="dot0"></div>
+  <div class="step-dot" id="dot1"></div>
+  <div class="step-dot" id="dot2"></div>
+  <div class="step-dot" id="dot3"></div>
+</div>
+
+<div class="content">
+
+  <!-- SCREEN 0: MES -->
+  <div class="screen active" id="screen0">
+    <div class="screen-title">¿Qué mes?</div>
+    <div class="screen-sub">Seleccioná el mes de la liquidación</div>
+    <div class="selector-grid three">
+      <button class="option-btn" onclick="selectMes('Enero')"><span>Ene</span></button>
+      <button class="option-btn" onclick="selectMes('Febrero')"><span>Feb</span></button>
+      <button class="option-btn" onclick="selectMes('Marzo')"><span>Mar</span></button>
+      <button class="option-btn" onclick="selectMes('Abril')"><span>Abr</span></button>
+      <button class="option-btn" onclick="selectMes('Mayo')"><span>May</span></button>
+      <button class="option-btn" onclick="selectMes('Junio')"><span>Jun</span></button>
+      <button class="option-btn" onclick="selectMes('Julio')"><span>Jul</span></button>
+      <button class="option-btn" onclick="selectMes('Agosto')"><span>Ago</span></button>
+      <button class="option-btn" onclick="selectMes('Septiembre')"><span>Sep</span></button>
+      <button class="option-btn" onclick="selectMes('Octubre')"><span>Oct</span></button>
+      <button class="option-btn" onclick="selectMes('Noviembre')"><span>Nov</span></button>
+      <button class="option-btn" onclick="selectMes('Diciembre')"><span>Dic</span></button>
+    </div>
+    <button class="cta-btn" id="btnMes" disabled onclick="goTo(1)"><span>Continuar →</span></button>
+  </div>
+
+  <!-- SCREEN 1: QUINCENA -->
+  <div class="screen" id="screen1">
+    <div class="screen-title">¿Qué quincena?</div>
+    <div class="screen-sub">Primera o segunda quincena del mes</div>
+    <div class="selector-grid">
+      <button class="option-btn quincena-option" onclick="selectQuincena('Q1')">
+        <span class="q-num">Q1</span>
+        <span class="q-label">Del 1 al 15</span>
+      </button>
+      <button class="option-btn quincena-option" onclick="selectQuincena('Q2')">
+        <span class="q-num">Q2</span>
+        <span class="q-label">Del 16 al 31</span>
+      </button>
+    </div>
+    <div style="margin-top: 16px;">
+      <div class="selector-grid three">
+        <button class="option-btn" onclick="selectAnio('2025')"><span>2025</span></button>
+        <button class="option-btn" onclick="selectAnio('2026')"><span>2026</span></button>
+        <button class="option-btn" onclick="selectAnio('2027')"><span>2027</span></button>
+      </div>
+    </div>
+    <button class="cta-btn" id="btnQuincena" disabled onclick="goTo(2)" style="margin-top: auto;"><span>Continuar →</span></button>
+    <button class="back-btn" onclick="goTo(0)">← Volver</button>
+  </div>
+
+  <!-- SCREEN 2: COTIZACIÓN -->
+  <div class="screen" id="screen2">
+    <div class="screen-title">Cotización del dólar</div>
+    <div class="screen-sub">¿A cuánto está el dólar hoy?</div>
+    <div class="dollar-input-wrap">
+      <span class="dollar-sign">$</span>
+      <input class="dollar-input" type="number" id="cotizacion" placeholder="1400" inputmode="numeric" oninput="checkCotizacion()">
+    </div>
+    <button class="cta-btn" id="btnCotizacion" disabled onclick="goTo(3)"><span>Continuar →</span></button>
+    <button class="back-btn" onclick="goTo(1)">← Volver</button>
+  </div>
+
+  <!-- SCREEN 3: CONFIRMAR -->
+  <div class="screen" id="screen3">
+    <div class="screen-title">Confirmar envío</div>
+    <div class="screen-sub">Revisá los datos antes de enviar</div>
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="summary-label">Período</span>
+        <span class="summary-value" id="summaryPeriodo">—</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Cotización</span>
+        <span class="summary-value" id="summaryCotizacion">—</span>
+      </div>
+    </div>
+    <div id="errorMsg" class="error-badge" style="display:none;"></div>
+    <button class="cta-btn" onclick="enviar()">🚀 Enviar liquidación</button>
+    <button class="back-btn" onclick="goTo(2)">← Volver</button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="spinner"></div>
+    <div class="loading-text">Enviando mensajes...</div>
+    <div class="loading-sub">Esto puede tardar unos segundos</div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="screen" id="screenSuccess">
+    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; flex:1; gap:20px; text-align:center;">
+      <div class="success-icon">✓</div>
+      <div class="screen-title">¡Listo!</div>
+      <div class="screen-sub">Los mensajes fueron enviados correctamente a WhatsApp.</div>
+      <button class="cta-btn" onclick="resetApp()" style="margin-top:20px;">Nueva liquidación</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="safe-bottom"></div>
+
+<script>
+  // Config
+  const N8N_WEBHOOK = 'https://tracing-laptop-unlighted.ngrok-free.dev/form-test/eaada86b-722c-4344-9797-4c6a5ddbe44e';
+
+  // State
+  let state = { mes: null, quincena: null, anio: null, cotizacion: null };
+  let currentScreen = 0;
+
+  function selectMes(mes) {
+    state.mes = mes;
+    document.querySelectorAll('#screen0 .option-btn').forEach(b => b.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    document.getElementById('btnMes').disabled = false;
+  }
+
+  function selectQuincena(q) {
+    state.quincena = q;
+    document.querySelectorAll('#screen1 .quincena-option').forEach(b => b.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    checkQuincena();
+  }
+
+  function selectAnio(a) {
+    state.anio = a;
+    document.querySelectorAll('#screen1 .selector-grid.three .option-btn').forEach(b => b.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+    checkQuincena();
+  }
+
+  function checkQuincena() {
+    document.getElementById('btnQuincena').disabled = !(state.quincena && state.anio);
+  }
+
+  function checkCotizacion() {
+    const val = document.getElementById('cotizacion').value;
+    state.cotizacion = val;
+    document.getElementById('btnCotizacion').disabled = !val || parseFloat(val) <= 0;
+  }
+
+  function goTo(screen) {
+    // Hide all
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('loadingScreen').classList.remove('active');
+
+    if (screen === 3) {
+      // Update summary
+      const periodo = `${state.mes} ${state.quincena} ${state.anio}`;
+      document.getElementById('summaryPeriodo').textContent = periodo;
+      document.getElementById('summaryCotizacion').textContent = `$ ${parseInt(state.cotizacion).toLocaleString('es-AR')}`;
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    document.getElementById(`screen${screen}`).classList.add('active');
+    currentScreen = screen;
+    updateDots(screen);
+  }
+
+  function updateDots(screen) {
+    for (let i = 0; i < 4; i++) {
+      const dot = document.getElementById(`dot${i}`);
+      dot.className = 'step-dot';
+      if (i < screen) dot.classList.add('done');
+      else if (i === screen) dot.classList.add('active');
+    }
+  }
+
+  async function enviar() {
+    // Show loading
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('loadingScreen').classList.add('active');
+    document.getElementById('stepsBar').style.display = 'none';
+
+    const periodo = `${state.mes} ${state.quincena} ${state.anio}`;
+
+    try {
+      const formData = new FormData();
+      formData.append('Período', periodo);
+      formData.append('Cotización del dólar (en pesos)', state.cotizacion);
+
+      const response = await fetch(N8N_WEBHOOK, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok || response.status === 200 || response.redirected) {
+        // Success
+        document.getElementById('loadingScreen').classList.remove('active');
+        document.getElementById('screenSuccess').classList.add('active');
+      } else {
+        throw new Error(`Error ${response.status}`);
+      }
+    } catch (err) {
+      document.getElementById('loadingScreen').classList.remove('active');
+      document.getElementById('stepsBar').style.display = 'flex';
+      document.getElementById('screen3').classList.add('active');
+      document.getElementById('errorMsg').style.display = 'block';
+      document.getElementById('errorMsg').textContent = `Error al conectar con n8n. Asegurate de que tu Mac esté prendida y ngrok corriendo. (${err.message})`;
+    }
+  }
+
+  function resetApp() {
+    state = { mes: null, quincena: null, anio: null, cotizacion: null };
+    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('cotizacion').value = '';
+    document.getElementById('btnMes').disabled = true;
+    document.getElementById('btnQuincena').disabled = true;
+    document.getElementById('btnCotizacion').disabled = true;
+    document.getElementById('stepsBar').style.display = 'flex';
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen0').classList.add('active');
+    updateDots(0);
+    currentScreen = 0;
+  }
+</script>
+</body>
+</html>
